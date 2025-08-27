@@ -43,6 +43,14 @@
             font-weight: 300;
         }
 
+        .nfl-logo {
+            width: 120px;
+            height: auto;
+            margin: 0 auto 1.5rem;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+        }
+
         @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -82,6 +90,41 @@
             font-weight: bold;
             color: #22d3ee;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .team-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .team-logo-fallback {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .vs-text {
+            font-size: 1.2rem;
+            color: #9ca3af;
+            font-weight: normal;
         }
 
         .game-info {
@@ -203,9 +246,13 @@
             }
         }
 
-        @media (max-width: 768px) {
+            @media (max-width: 768px) {
             .main-title {
                 font-size: 2.5rem;
+            }
+
+            .nfl-logo {
+                width: 80px;
             }
             
             .games-container {
@@ -219,6 +266,16 @@
             
             .matchup {
                 font-size: 1.4rem;
+                gap: 0.5rem;
+            }
+
+            .team-logo {
+                width: 30px;
+                height: 30px;
+            }
+
+            .vs-text {
+                font-size: 1rem;
             }
             
             .countdown {
@@ -241,6 +298,7 @@
     
     <div class="header">
         <h1 class="main-title">NFL Week 1</h1>
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/National_Football_League_logo.svg/1200px-National_Football_League_logo.svg.png" alt="NFL Logo" class="nfl-logo">
         <p class="subtitle">Jogos das Equipas Favoritas</p>
     </div>
     
@@ -249,6 +307,54 @@
     </div>
 
     <script>
+        // Team colors for fallback circles
+        const teamColors = {
+            'Cowboys': '#041E42',
+            'Eagles': '#004C54',
+            'Chiefs': '#E31837',
+            'Chargers': '#0080C6',
+            'Raiders': '#000000',
+            'Patriots': '#002244',
+            'Giants': '#0B2265',
+            'Commanders': '#5A1414',
+            'Packers': '#203731',
+            'Seahawks': '#002244',
+            'Ravens': '#241773',
+            'Bills': '#00338D'
+        };
+
+        // Team abbreviations for fallback
+        const teamAbbr = {
+            'Cowboys': 'DAL',
+            'Eagles': 'PHI',
+            'Chiefs': 'KC',
+            'Chargers': 'LAC',
+            'Raiders': 'LV',
+            'Patriots': 'NE',
+            'Giants': 'NYG',
+            'Commanders': 'WSH',
+            'Packers': 'GB',
+            'Seahawks': 'SEA',
+            'Ravens': 'BAL',
+            'Bills': 'BUF'
+        };
+
+        // Team logos mapping - using reliable sources
+        const teamLogos = {
+            'Cowboys': 'https://logos-world.net/wp-content/uploads/2020/06/Dallas-Cowboys-Logo.png',
+            'Eagles': 'https://logos-world.net/wp-content/uploads/2020/06/Philadelphia-Eagles-Logo.png',
+            'Chiefs': 'https://logos-world.net/wp-content/uploads/2020/06/Kansas-City-Chiefs-Logo.png',
+            'Chargers': 'https://logos-world.net/wp-content/uploads/2020/06/Los-Angeles-Chargers-Logo.png',
+            'Raiders': 'https://logos-world.net/wp-content/uploads/2020/06/Las-Vegas-Raiders-Logo.png',
+            'Patriots': 'https://logos-world.net/wp-content/uploads/2020/06/New-England-Patriots-Logo.png',
+            'Giants': 'https://logos-world.net/wp-content/uploads/2020/06/New-York-Giants-Logo.png',
+            'Commanders': 'https://logos-world.net/wp-content/uploads/2023/02/Washington-Commanders-Logo.png',
+            'Packers': 'https://logos-world.net/wp-content/uploads/2020/06/Green-Bay-Packers-Logo.png',
+            'Seahawks': 'https://logos-world.net/wp-content/uploads/2020/06/Seattle-Seahawks-Logo.png',
+            'Ravens': 'https://logos-world.net/wp-content/uploads/2020/06/Baltimore-Ravens-Logo.png',
+            'Bills': 'https://logos-world.net/wp-content/uploads/2020/06/Buffalo-Bills-Logo.png'
+        };
+
         // Game schedule data (all times in Lisbon timezone)
         const games = [
             {
@@ -332,7 +438,6 @@
             const hoursEl = document.getElementById(`hours-${game.id}`);
             const minutesEl = document.getElementById(`minutes-${game.id}`);
             const secondsEl = document.getElementById(`seconds-${game.id}`);
-            const statusEl = document.getElementById(`status-${game.id}`);
             const cardEl = document.getElementById(`card-${game.id}`);
 
             if (difference > 0) {
@@ -345,34 +450,51 @@
                 hoursEl.textContent = hours.toString().padStart(2, '0');
                 minutesEl.textContent = minutes.toString().padStart(2, '0');
                 secondsEl.textContent = seconds.toString().padStart(2, '0');
-
-                if (days === 0 && hours < 2) {
-                    statusEl.textContent = 'EM BREVE!';
-                    cardEl.classList.add('next-game');
-                } else {
-                    statusEl.textContent = 'Próximo jogo';
-                    cardEl.classList.remove('next-game');
-                }
             } else {
                 // Game time passed
                 daysEl.textContent = '00';
                 hoursEl.textContent = '00';
                 minutesEl.textContent = '00';
                 secondsEl.textContent = '00';
-                statusEl.textContent = 'JOGO TERMINADO';
                 cardEl.classList.add('game-finished');
-                cardEl.classList.remove('next-game');
             }
         }
 
         // Create game card HTML
         function createGameCard(game) {
+            const matchupParts = game.matchup.split(' @ ');
+            const awayTeam = matchupParts[0];
+            const homeTeam = matchupParts[1];
+            
             return `
                 <div class="game-card" id="card-${game.id}">
                     <div class="game-header">
-                        <div class="matchup">${game.matchup}</div>
+                        <div class="matchup">
+                            <div class="team-info">
+                                <img src="${teamLogos[awayTeam]}" 
+                                     alt="${awayTeam} logo" 
+                                     class="team-logo"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="team-logo-fallback" 
+                                     style="background-color: ${teamColors[awayTeam]}; display: none;">
+                                    ${teamAbbr[awayTeam]}
+                                </div>
+                                <span>${awayTeam}</span>
+                            </div>
+                            <span class="vs-text">@</span>
+                            <div class="team-info">
+                                <img src="${teamLogos[homeTeam]}" 
+                                     alt="${homeTeam} logo" 
+                                     class="team-logo"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="team-logo-fallback" 
+                                     style="background-color: ${teamColors[homeTeam]}; display: none;">
+                                    ${teamAbbr[homeTeam]}
+                                </div>
+                                <span>${homeTeam}</span>
+                            </div>
+                        </div>
                         <div class="game-info">${formatGameDate(game.date)}</div>
-                        <div class="game-status" id="status-${game.id}">Próximo jogo</div>
                     </div>
                     
                     <div class="countdown">
